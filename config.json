@@ -1,0 +1,94 @@
+{
+  "display": {
+    "width": 1560,
+    "height": 720,
+    "title": "Psion Launcher"
+  },
+  "grid": {
+    "columns": 5,
+    "rows": 2
+  },
+  "theme": {
+    "background": "#B0B0B0",
+    "text": "#000000"
+  },
+  "applications": [
+    {
+      "name": "Warp",
+      "type": "exec",
+      "command": "warp-terminal",
+      "icon": "images/warp.png",
+      "color": "#2ECC71"
+    },
+    {
+      "name": "Firefox",
+      "type": "exec",
+      "command": "firefox",
+      "icon": "images/firefox.png",
+      "color": "#E74C3C"
+    },
+    {
+      "name": "VS Code",
+      "type": "exec",
+      "command": "code",
+      "icon": "images/vscode.png",
+      "color": "#3498DB"
+    },
+    {
+      "name": "ChatGPT",
+      "type": "url",
+      "command": "https://chat.openai.com",
+      "icon": "images/chatgpt.png",
+      "color": "#10A37F"
+    },
+    {
+      "name": "IT Support",
+      "type": "exec",
+      "command": "/home/james/Dev/IT-Support-tool/client-support-toolkit.sh",
+      "icon": "images/support.png",
+      "color": "#10A37F"
+    },
+    {
+      "name": "File Manager",
+      "type": "exec",
+      "command": "pcmanfm",
+      "icon": "images/filemanager.png",
+      "color": "#F39C12"
+    }
+  ],
+  "side_buttons": [
+    {
+      "name": "Settings",
+      "type": "exec",
+      "command": "lxappearance",
+      "icon": "images/settingsWide.png",
+      "color": "#9B59B6"
+    },
+    {
+      "name": "System",
+      "type": "system_info",
+      "icon": "images/systemWide.png",
+      "color": "#34495E"
+    },
+    {
+      "name": "Restart",
+      "type": "system",
+      "command": "sudo reboot",
+      "icon": "images/restartWide.png",
+      "color": "#E67E22"
+    },
+    {
+      "name": "Shutdown",
+      "type": "system",
+      "command": "sudo shutdown -h now",
+      "icon": "images/powerWide.png",
+      "color": "#C0392B"
+    },
+    {
+      "name": "Exit",
+      "type": "exit",
+      "icon": "images/exit.png",
+      "color": "#95A5A6"
+    }
+  ]
+}

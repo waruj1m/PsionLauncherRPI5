@@ -1,0 +1,10 @@
+{
+  "name": "Classic Green",
+  "description": "Psion Series 5 classic green-on-gray theme",
+  "background": "#A8B090",
+  "text": "#1A3A1A",
+  "button_bg": "#C8D0B0",
+  "button_border": "#4A5A3A",
+  "button_hover": "#B0C098",
+  "button_pressed": "#98B080"
+}

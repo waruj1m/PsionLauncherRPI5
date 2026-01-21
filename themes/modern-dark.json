@@ -1,0 +1,10 @@
+{
+  "name": "Modern Dark",
+  "description": "Modern dark theme",
+  "background": "#2C3E50",
+  "text": "#ECF0F1",
+  "button_bg": "#34495E",
+  "button_border": "#1ABC9C",
+  "button_hover": "#3E5871",
+  "button_pressed": "#1E2D3D"
+}
