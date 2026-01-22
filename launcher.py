@@ -410,6 +410,8 @@ class LauncherButton(tk.Frame):
                     subprocess.Popen(command, shell=True)
             elif app_type == 'url':
                 subprocess.Popen(['xdg-open', self.app_data['command']])
+            elif app_type == 'terminal':
+                self.launch_terminal()
             elif app_type == 'system':
                 self.handle_system_command()
             elif app_type == 'system_info':
@@ -420,6 +422,43 @@ class LauncherButton(tk.Frame):
         except Exception as e:
             messagebox.showerror("Launch Error", 
                                f"Failed to launch {self.app_data['name']}:\n{str(e)}")
+    
+    def launch_terminal(self):
+        """Launch command in a fullscreen terminal"""
+        command = self.app_data.get('command', '')
+        
+        # Launch terminal with the command
+        proc = subprocess.Popen(
+            ['x-terminal-emulator', '-e', 'bash', '-c', f'{command}; exec bash'],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL
+        )
+        
+        # Try to make the terminal fullscreen using wmctrl (common on Raspberry Pi OS)
+        def make_fullscreen():
+            time.sleep(0.5)  # Wait for terminal to open
+            try:
+                # Find the terminal window and make it fullscreen
+                subprocess.run(
+                    ['wmctrl', '-r', ':ACTIVE:', '-b', 'add,fullscreen'],
+                    timeout=1,
+                    capture_output=True
+                )
+            except (subprocess.TimeoutExpired, FileNotFoundError, subprocess.SubprocessError):
+                # wmctrl not available or failed, try alternative method
+                try:
+                    # Try using xdotool as fallback
+                    subprocess.run(
+                        ['xdotool', 'search', '--class', 'x-terminal-emulator', 'windowactivate', '--sync', 'key', 'F11'],
+                        timeout=1,
+                        capture_output=True
+                    )
+                except (subprocess.TimeoutExpired, FileNotFoundError, subprocess.SubprocessError):
+                    # If both fail, terminal will open normally (not fullscreen)
+                    pass
+        
+        # Run fullscreen attempt in background thread
+        threading.Thread(target=make_fullscreen, daemon=True).start()
     
     def handle_system_command(self):
         """Handle system commands like shutdown/restart"""
