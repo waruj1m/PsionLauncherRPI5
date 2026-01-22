@@ -313,19 +313,23 @@ class LauncherButton(tk.Frame):
             )
             self.text_label.pack(side=tk.LEFT, padx=(5, 8))
         else:
-            # Square button layout (vertical)
-            self.icon_label = tk.Label(self, bg='#F5F5F5')
-            self.icon_label.pack(pady=(8, 4))
+            # Square button layout (vertical) - fill the space
+            # Use a container frame to better control spacing
+            self.content_container = tk.Frame(self, bg='#F5F5F5')
+            self.content_container.pack(expand=True, fill=tk.BOTH, padx=5, pady=5)
+            
+            self.icon_label = tk.Label(self.content_container, bg='#F5F5F5')
+            self.icon_label.pack(expand=True, fill=tk.BOTH)
             
             self.text_label = tk.Label(
-                self,
+                self.content_container,
                 text=app_data['name'],
-                font=('Monospace', 10, 'bold'),
+                font=('Monospace', 13, 'bold'),
                 bg='#F5F5F5',
                 fg='#000000',
-                wraplength=150
+                wraplength=160
             )
-            self.text_label.pack()
+            self.text_label.pack(pady=(3, 0))
         
         self.load_icon()
         
@@ -333,16 +337,21 @@ class LauncherButton(tk.Frame):
         self.bind('<Button-1>', self.on_click)
         self.icon_label.bind('<Button-1>', self.on_click)
         self.text_label.bind('<Button-1>', self.on_click)
+        if hasattr(self, 'content_container'):
+            self.content_container.bind('<Button-1>', self.on_click)
         
         # Bind hover events
-        for widget in [self, self.icon_label, self.text_label]:
+        hover_widgets = [self, self.icon_label, self.text_label]
+        if hasattr(self, 'content_container'):
+            hover_widgets.append(self.content_container)
+        for widget in hover_widgets:
             widget.bind('<Enter>', self.on_enter)
             widget.bind('<Leave>', self.on_leave)
     
     def load_icon(self):
         """Load or generate icon for the application"""
         icon_path = self.app_data.get('icon', '')
-        icon_size = (80, 80) if not self.wide else (60, 60)
+        icon_size = (130, 130) if not self.wide else (60, 60)
         
         try:
             if icon_path and Path(icon_path).exists():
@@ -354,8 +363,9 @@ class LauncherButton(tk.Frame):
                 draw = ImageDraw.Draw(img)
                 
                 # Try to use a font, fallback to default
+                font_size = 80 if not self.wide else 40
                 try:
-                    font = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf', 32)
+                    font = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf', font_size)
                 except:
                     font = ImageFont.load_default()
                 
@@ -379,12 +389,16 @@ class LauncherButton(tk.Frame):
         self.configure(bg='#E0E0E0')
         self.icon_label.configure(bg='#E0E0E0')
         self.text_label.configure(bg='#E0E0E0')
+        if hasattr(self, 'content_container'):
+            self.content_container.configure(bg='#E0E0E0')
     
     def on_leave(self, event):
         """Handle mouse leave"""
         self.configure(bg='#F5F5F5')
         self.icon_label.configure(bg='#F5F5F5')
         self.text_label.configure(bg='#F5F5F5')
+        if hasattr(self, 'content_container'):
+            self.content_container.configure(bg='#F5F5F5')
     
     def on_click(self, event):
         """Handle click event"""
@@ -392,6 +406,8 @@ class LauncherButton(tk.Frame):
         self.configure(bg='#C0C0C0')
         self.icon_label.configure(bg='#C0C0C0')
         self.text_label.configure(bg='#C0C0C0')
+        if hasattr(self, 'content_container'):
+            self.content_container.configure(bg='#C0C0C0')
         self.after(100, lambda: self.on_leave(None))
         
         # Launch app
@@ -691,10 +707,18 @@ class PsionLauncher:
         # Configure window
         self.root.title(self.config['display']['title'])
         self.root.geometry(f"{self.config['display']['width']}x{self.config['display']['height']}")
+        
+        # Force fullscreen mode
         self.root.attributes("-fullscreen", True)
+        self.root.overrideredirect(True)
+        
         self.root.configure(cursor="arrow")
         self.root.resizable(False, False)
         self.root.configure(bg=self.config['theme']['background'])
+        
+        # Ensure window is on top and focused
+        self.root.lift()
+        self.root.focus_force()
         
         # Bind keyboard shortcuts
         self.root.bind('<Escape>', lambda e: self.on_close())
