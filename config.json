@@ -49,13 +49,27 @@
       "color": "#10A37F"
     },
     {
+      "name": "ShellBeats",
+      "type": "exec",
+      "command": "shellbeats",
+      "icon": "images/shellbeats.png",
+      "color": "#10A37F"
+    },
+    {
       "name": "File Manager",
       "type": "exec",
       "command": "pcmanfm",
       "icon": "images/filemanager.png",
       "color": "#F39C12"
+    },
+    {
+      "name": "Calendar",
+      "type": "exec",
+      "command": "calendar",
+      "icon": "images/calendar.png",
+      "color": "#F39C12"
     }
-  ],
+],
   "side_buttons": [
     {
       "name": "Settings",
@@ -86,7 +100,7 @@
     },
     {
       "name": "Exit",
-      "type": "exit",
+      "type": "system",
       "icon": "images/exit.png",
       "color": "#95A5A6"
     }
