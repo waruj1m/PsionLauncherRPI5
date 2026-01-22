@@ -15,6 +15,8 @@ from PIL import Image, ImageDraw, ImageFont, ImageTk
 import psutil
 import threading
 import time
+import math
+from datetime import datetime
 
 
 class StatusBar(tk.Frame):
@@ -277,15 +279,15 @@ class LauncherButton(tk.Frame):
         self.wide = wide
         self.parent_root = parent.winfo_toplevel()
         
-        # Configure frame
-        width = 260 if wide else 200
-        height = 110 if wide else 160
+        # Configure frame - reduced sizes
+        width = 220 if wide else 140
+        height = 70 if wide else 120
         
         self.configure(
             bg='#F5F5F5',
             relief=tk.RAISED,
-            borderwidth=3,
-            highlightthickness=2,
+            borderwidth=2,
+            highlightthickness=1,
             highlightbackground='#A0A0A0',
             width=width,
             height=height
@@ -295,33 +297,33 @@ class LauncherButton(tk.Frame):
         if wide:
             # Wide button layout (horizontal)
             content_frame = tk.Frame(self, bg='#F5F5F5')
-            content_frame.pack(expand=True)
+            content_frame.pack(expand=True, fill=tk.BOTH)
             
             # Icon on left
             self.icon_label = tk.Label(content_frame, bg='#F5F5F5')
-            self.icon_label.pack(side=tk.LEFT, padx=(10, 5))
+            self.icon_label.pack(side=tk.LEFT, padx=(5, 3))
             
             # Text on right
             self.text_label = tk.Label(
                 content_frame,
                 text=app_data['name'],
-                font=('Monospace', 11, 'bold'),
+                font=('Monospace', 10, 'bold'),
                 bg='#F5F5F5',
                 fg='#000000'
             )
-            self.text_label.pack(side=tk.LEFT, padx=(5, 10))
+            self.text_label.pack(side=tk.LEFT, padx=(3, 5))
         else:
             # Square button layout (vertical)
             self.icon_label = tk.Label(self, bg='#F5F5F5')
-            self.icon_label.pack(pady=(10, 5))
+            self.icon_label.pack(pady=(5, 2))
             
             self.text_label = tk.Label(
                 self,
                 text=app_data['name'],
-                font=('Monospace', 11, 'bold'),
+                font=('Monospace', 9, 'bold'),
                 bg='#F5F5F5',
                 fg='#000000',
-                wraplength=160
+                wraplength=120
             )
             self.text_label.pack()
         
@@ -340,7 +342,7 @@ class LauncherButton(tk.Frame):
     def load_icon(self):
         """Load or generate icon for the application"""
         icon_path = self.app_data.get('icon', '')
-        icon_size = (80, 80) if not self.wide else (70, 70)
+        icon_size = (64, 64) if not self.wide else (50, 50)
         
         try:
             if icon_path and Path(icon_path).exists():
@@ -416,9 +418,6 @@ class LauncherButton(tk.Frame):
                 self.handle_system_command()
             elif app_type == 'system_info':
                 self.show_system_info()
-            elif app_type == 'exit':
-                self.parent_root.quit()
-                self.parent_root.destroy()
         except Exception as e:
             messagebox.showerror("Launch Error", 
                                f"Failed to launch {self.app_data['name']}:\n{str(e)}")
@@ -472,6 +471,123 @@ class LauncherButton(tk.Frame):
     def show_system_info(self):
         """Show system information window"""
         SystemInfoWindow(self.parent_root)
+
+
+class AnalogueClock(tk.Canvas):
+    """Analogue clock widget with calendar"""
+    
+    def __init__(self, parent, **kwargs):
+        size = kwargs.pop('size', 200)
+        super().__init__(parent, width=size, height=size + 60, bg='#F5F5F5', 
+                        highlightthickness=0, **kwargs)
+        self.size = size
+        self.center = size // 2
+        self.radius = size // 2 - 20
+        
+        self.running = True
+        self.update_clock()
+        
+        # Start update thread
+        self.update_thread = threading.Thread(target=self.update_loop, daemon=True)
+        self.update_thread.start()
+    
+    def update_loop(self):
+        """Update clock every second"""
+        while self.running:
+            self.after(0, self.update_clock)
+            time.sleep(1)
+    
+    def update_clock(self):
+        """Draw the clock face and hands"""
+        self.delete("all")
+        
+        now = datetime.now()
+        hours = now.hour % 12
+        minutes = now.minute
+        seconds = now.second
+        
+        # Draw clock face circle
+        self.create_oval(
+            self.center - self.radius,
+            self.center - self.radius,
+            self.center + self.radius,
+            self.center + self.radius,
+            outline='#000000',
+            width=2
+        )
+        
+        # Draw hour markers
+        for i in range(12):
+            angle = math.radians(i * 30 - 90)
+            inner_radius = self.radius - 8
+            outer_radius = self.radius - 2
+            
+            x1 = self.center + inner_radius * math.cos(angle)
+            y1 = self.center + inner_radius * math.sin(angle)
+            x2 = self.center + outer_radius * math.cos(angle)
+            y2 = self.center + outer_radius * math.sin(angle)
+            
+            self.create_line(x1, y1, x2, y2, fill='#000000', width=2)
+        
+        # Draw minute markers
+        for i in range(60):
+            if i % 5 != 0:
+                angle = math.radians(i * 6 - 90)
+                inner_radius = self.radius - 5
+                outer_radius = self.radius - 2
+                
+                x1 = self.center + inner_radius * math.cos(angle)
+                y1 = self.center + inner_radius * math.sin(angle)
+                x2 = self.center + outer_radius * math.cos(angle)
+                y2 = self.center + outer_radius * math.sin(angle)
+                
+                self.create_line(x1, y1, x2, y2, fill='#666666', width=1)
+        
+        # Calculate hand angles
+        hour_angle = math.radians((hours * 30 + minutes * 0.5) - 90)
+        minute_angle = math.radians((minutes * 6 + seconds * 0.1) - 90)
+        second_angle = math.radians((seconds * 6) - 90)
+        
+        # Draw hour hand
+        hour_length = self.radius * 0.5
+        hour_x = self.center + hour_length * math.cos(hour_angle)
+        hour_y = self.center + hour_length * math.sin(hour_angle)
+        self.create_line(self.center, self.center, hour_x, hour_y, 
+                        fill='#000000', width=4, capstyle=tk.ROUND)
+        
+        # Draw minute hand
+        minute_length = self.radius * 0.7
+        minute_x = self.center + minute_length * math.cos(minute_angle)
+        minute_y = self.center + minute_length * math.sin(minute_angle)
+        self.create_line(self.center, self.center, minute_x, minute_y, 
+                        fill='#000000', width=3, capstyle=tk.ROUND)
+        
+        # Draw second hand
+        second_length = self.radius * 0.8
+        second_x = self.center + second_length * math.cos(second_angle)
+        second_y = self.center + second_length * math.sin(second_angle)
+        self.create_line(self.center, self.center, second_x, second_y, 
+                        fill='#E74C3C', width=1, capstyle=tk.ROUND)
+        
+        # Draw center dot
+        self.create_oval(self.center - 4, self.center - 4,
+                        self.center + 4, self.center + 4,
+                        fill='#000000', outline='#000000')
+        
+        # Draw date below clock
+        date_str = now.strftime("%A, %B %d, %Y")
+        time_str = now.strftime("%I:%M:%S %p")
+        
+        self.create_text(self.center, self.size + 15,
+                        text=date_str, font=('Monospace', 10, 'bold'),
+                        fill='#000000')
+        self.create_text(self.center, self.size + 35,
+                        text=time_str, font=('Monospace', 9),
+                        fill='#333333')
+    
+    def stop(self):
+        """Stop the clock update thread"""
+        self.running = False
 
 
 class PsionLauncher:
@@ -607,20 +723,20 @@ class PsionLauncher:
         title = tk.Label(
             self.root,
             text=self.config['display']['title'],
-            font=('Monospace', 24, 'bold'),
+            font=('Monospace', 20, 'bold'),
             bg=self.config['theme']['background'],
             fg=self.config['theme']['text'],
-            pady=10
+            pady=5
         )
         title.pack()
         
         # Main content frame
         content_frame = tk.Frame(self.root, bg=self.config['theme']['background'])
-        content_frame.pack(expand=True, pady=20)
+        content_frame.pack(expand=True, pady=10)
         
         # Left side: Grid of main application buttons
         grid_frame = tk.Frame(content_frame, bg=self.config['theme']['background'])
-        grid_frame.pack(side=tk.LEFT, padx=(0, 20))
+        grid_frame.pack(side=tk.LEFT, padx=(20, 15))
         
         apps = self.config['applications']
         cols = self.config['grid']['columns']
@@ -630,20 +746,29 @@ class PsionLauncher:
             col = i % cols
             
             btn = LauncherButton(grid_frame, app)
-            btn.grid(row=row, column=col, padx=10, pady=10)
+            btn.grid(row=row, column=col, padx=5, pady=5)
+        
+        # Middle: Clock widget
+        clock_frame = tk.Frame(content_frame, bg=self.config['theme']['background'])
+        clock_frame.pack(side=tk.LEFT, padx=15)
+        
+        self.clock = AnalogueClock(clock_frame, size=180)
+        self.clock.pack()
         
         # Right side: Vertical stack of wide buttons
         side_frame = tk.Frame(content_frame, bg=self.config['theme']['background'])
-        side_frame.pack(side=tk.LEFT)
+        side_frame.pack(side=tk.LEFT, padx=(15, 20))
         
         side_buttons = self.config.get('side_buttons', [])
         for side_btn_data in side_buttons:
             btn = LauncherButton(side_frame, side_btn_data, wide=True)
-            btn.pack(pady=10)
+            btn.pack(pady=5)
     
     def on_close(self):
         """Handle application close"""
         self.status_bar.stop()
+        if hasattr(self, 'clock'):
+            self.clock.stop()
         self.root.quit()
         self.root.destroy()
     

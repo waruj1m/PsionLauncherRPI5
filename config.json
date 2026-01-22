@@ -43,14 +43,14 @@
     },
     {
       "name": "IT Support",
-      "type": "exec",
+      "type": "terminal",
       "command": "/home/james/Dev/IT-Support-tool/client-support-toolkit.sh",
       "icon": "images/support.png",
       "color": "#10A37F"
     },
     {
       "name": "ShellBeats",
-      "type": "exec",
+      "type": "terminal",
       "command": "shellbeats",
       "icon": "images/shellbeats.png",
       "color": "#10A37F"
@@ -97,12 +97,6 @@
       "command": "sudo shutdown -h now",
       "icon": "images/powerWide.png",
       "color": "#C0392B"
-    },
-    {
-      "name": "Exit",
-      "type": "system",
-      "icon": "images/exit.png",
-      "color": "#95A5A6"
     }
   ]
 }
