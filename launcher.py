@@ -279,9 +279,9 @@ class LauncherButton(tk.Frame):
         self.wide = wide
         self.parent_root = parent.winfo_toplevel()
         
-        # Configure frame - reduced sizes
-        width = 220 if wide else 140
-        height = 70 if wide else 120
+        # Configure frame - optimized for full screen
+        width = 240 if wide else 180
+        height = 80 if wide else 150
         
         self.configure(
             bg='#F5F5F5',
@@ -301,29 +301,29 @@ class LauncherButton(tk.Frame):
             
             # Icon on left
             self.icon_label = tk.Label(content_frame, bg='#F5F5F5')
-            self.icon_label.pack(side=tk.LEFT, padx=(5, 3))
+            self.icon_label.pack(side=tk.LEFT, padx=(8, 5))
             
             # Text on right
             self.text_label = tk.Label(
                 content_frame,
                 text=app_data['name'],
-                font=('Monospace', 10, 'bold'),
+                font=('Monospace', 11, 'bold'),
                 bg='#F5F5F5',
                 fg='#000000'
             )
-            self.text_label.pack(side=tk.LEFT, padx=(3, 5))
+            self.text_label.pack(side=tk.LEFT, padx=(5, 8))
         else:
             # Square button layout (vertical)
             self.icon_label = tk.Label(self, bg='#F5F5F5')
-            self.icon_label.pack(pady=(5, 2))
+            self.icon_label.pack(pady=(8, 4))
             
             self.text_label = tk.Label(
                 self,
                 text=app_data['name'],
-                font=('Monospace', 9, 'bold'),
+                font=('Monospace', 10, 'bold'),
                 bg='#F5F5F5',
                 fg='#000000',
-                wraplength=120
+                wraplength=150
             )
             self.text_label.pack()
         
@@ -342,7 +342,7 @@ class LauncherButton(tk.Frame):
     def load_icon(self):
         """Load or generate icon for the application"""
         icon_path = self.app_data.get('icon', '')
-        icon_size = (64, 64) if not self.wide else (50, 50)
+        icon_size = (80, 80) if not self.wide else (60, 60)
         
         try:
             if icon_path and Path(icon_path).exists():
@@ -478,7 +478,7 @@ class AnalogueClock(tk.Canvas):
     
     def __init__(self, parent, **kwargs):
         size = kwargs.pop('size', 200)
-        super().__init__(parent, width=size, height=size + 60, bg='#F5F5F5', 
+        super().__init__(parent, width=size, height=size + 80, bg='#F5F5F5', 
                         highlightthickness=0, **kwargs)
         self.size = size
         self.center = size // 2
@@ -578,11 +578,11 @@ class AnalogueClock(tk.Canvas):
         date_str = now.strftime("%A, %B %d, %Y")
         time_str = now.strftime("%I:%M:%S %p")
         
-        self.create_text(self.center, self.size + 15,
-                        text=date_str, font=('Monospace', 10, 'bold'),
+        self.create_text(self.center, self.size + 20,
+                        text=date_str, font=('Monospace', 11, 'bold'),
                         fill='#000000')
-        self.create_text(self.center, self.size + 35,
-                        text=time_str, font=('Monospace', 9),
+        self.create_text(self.center, self.size + 45,
+                        text=time_str, font=('Monospace', 10),
                         fill='#333333')
     
     def stop(self):
@@ -723,20 +723,21 @@ class PsionLauncher:
         title = tk.Label(
             self.root,
             text=self.config['display']['title'],
-            font=('Monospace', 20, 'bold'),
+            font=('Monospace', 22, 'bold'),
             bg=self.config['theme']['background'],
             fg=self.config['theme']['text'],
-            pady=5
+            pady=8
         )
         title.pack()
         
-        # Main content frame
+        # Main content frame - use full width and height
         content_frame = tk.Frame(self.root, bg=self.config['theme']['background'])
-        content_frame.pack(expand=True, pady=10)
+        content_frame.pack(fill=tk.BOTH, expand=True, padx=30, pady=15)
         
+        # Use grid layout for better distribution across full width
         # Left side: Grid of main application buttons
         grid_frame = tk.Frame(content_frame, bg=self.config['theme']['background'])
-        grid_frame.pack(side=tk.LEFT, padx=(20, 15))
+        grid_frame.grid(row=0, column=0, sticky='nsew', padx=(0, 30))
         
         apps = self.config['applications']
         cols = self.config['grid']['columns']
@@ -746,23 +747,29 @@ class PsionLauncher:
             col = i % cols
             
             btn = LauncherButton(grid_frame, app)
-            btn.grid(row=row, column=col, padx=5, pady=5)
+            btn.grid(row=row, column=col, padx=8, pady=8)
         
         # Middle: Clock widget
         clock_frame = tk.Frame(content_frame, bg=self.config['theme']['background'])
-        clock_frame.pack(side=tk.LEFT, padx=15)
+        clock_frame.grid(row=0, column=1, sticky='ns', padx=30)
         
-        self.clock = AnalogueClock(clock_frame, size=180)
+        self.clock = AnalogueClock(clock_frame, size=220)
         self.clock.pack()
         
         # Right side: Vertical stack of wide buttons
         side_frame = tk.Frame(content_frame, bg=self.config['theme']['background'])
-        side_frame.pack(side=tk.LEFT, padx=(15, 20))
+        side_frame.grid(row=0, column=2, sticky='nsew', padx=(30, 0))
         
         side_buttons = self.config.get('side_buttons', [])
         for side_btn_data in side_buttons:
             btn = LauncherButton(side_frame, side_btn_data, wide=True)
-            btn.pack(pady=5)
+            btn.pack(pady=8, fill=tk.X)
+        
+        # Configure grid weights to distribute space evenly
+        content_frame.grid_columnconfigure(0, weight=3, uniform='cols')
+        content_frame.grid_columnconfigure(1, weight=1, uniform='cols')
+        content_frame.grid_columnconfigure(2, weight=1, uniform='cols')
+        content_frame.grid_rowconfigure(0, weight=1)
     
     def on_close(self):
         """Handle application close"""
