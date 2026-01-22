@@ -474,11 +474,11 @@ class LauncherButton(tk.Frame):
 
 
 class AnalogueClock(tk.Canvas):
-    """Analogue clock widget with calendar"""
+    """Analogue clock widget - face only"""
     
     def __init__(self, parent, **kwargs):
         size = kwargs.pop('size', 200)
-        super().__init__(parent, width=size, height=size + 80, bg='#F5F5F5', 
+        super().__init__(parent, width=size, height=size, bg='#F5F5F5', 
                         highlightthickness=0, **kwargs)
         self.size = size
         self.center = size // 2
@@ -573,17 +573,6 @@ class AnalogueClock(tk.Canvas):
         self.create_oval(self.center - 4, self.center - 4,
                         self.center + 4, self.center + 4,
                         fill='#000000', outline='#000000')
-        
-        # Draw date below clock
-        date_str = now.strftime("%A, %B %d, %Y")
-        time_str = now.strftime("%I:%M:%S %p")
-        
-        self.create_text(self.center, self.size + 20,
-                        text=date_str, font=('Monospace', 11, 'bold'),
-                        fill='#000000')
-        self.create_text(self.center, self.size + 45,
-                        text=time_str, font=('Monospace', 10),
-                        fill='#333333')
     
     def stop(self):
         """Stop the clock update thread"""
@@ -719,25 +708,50 @@ class PsionLauncher:
         self.status_bar = StatusBar(self.root)
         self.status_bar.pack(fill=tk.X, side=tk.TOP)
         
-        # Title
+        # Top header frame with title, date/time, and clock
+        header_frame = tk.Frame(self.root, bg=self.config['theme']['background'])
+        header_frame.pack(fill=tk.X, pady=(10, 5))
+        
+        # Title and date/time on left
+        title_frame = tk.Frame(header_frame, bg=self.config['theme']['background'])
+        title_frame.pack(side=tk.LEFT, padx=30)
+        
         title = tk.Label(
-            self.root,
+            title_frame,
             text=self.config['display']['title'],
-            font=('Monospace', 22, 'bold'),
+            font=('Monospace', 24, 'bold'),
             bg=self.config['theme']['background'],
-            fg=self.config['theme']['text'],
-            pady=8
+            fg=self.config['theme']['text']
         )
-        title.pack()
+        title.pack(anchor='w')
+        
+        # Date and time subtitle
+        self.datetime_label = tk.Label(
+            title_frame,
+            text="",
+            font=('Monospace', 12),
+            bg=self.config['theme']['background'],
+            fg=self.config['theme']['text']
+        )
+        self.datetime_label.pack(anchor='w', pady=(2, 0))
+        
+        # Clock face in top-right corner
+        clock_frame = tk.Frame(header_frame, bg=self.config['theme']['background'])
+        clock_frame.pack(side=tk.RIGHT, padx=30)
+        
+        self.clock = AnalogueClock(clock_frame, size=140)
+        self.clock.pack()
+        
+        # Update date/time label
+        self.update_datetime()
         
         # Main content frame - use full width and height
         content_frame = tk.Frame(self.root, bg=self.config['theme']['background'])
-        content_frame.pack(fill=tk.BOTH, expand=True, padx=30, pady=15)
+        content_frame.pack(fill=tk.BOTH, expand=True, padx=30, pady=(10, 30))
         
-        # Use grid layout for better distribution across full width
         # Left side: Grid of main application buttons
         grid_frame = tk.Frame(content_frame, bg=self.config['theme']['background'])
-        grid_frame.grid(row=0, column=0, sticky='nsew', padx=(0, 30))
+        grid_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 30))
         
         apps = self.config['applications']
         cols = self.config['grid']['columns']
@@ -747,29 +761,30 @@ class PsionLauncher:
             col = i % cols
             
             btn = LauncherButton(grid_frame, app)
-            btn.grid(row=row, column=col, padx=8, pady=8)
+            btn.grid(row=row, column=col, padx=8, pady=8, sticky='nsew')
         
-        # Middle: Clock widget
-        clock_frame = tk.Frame(content_frame, bg=self.config['theme']['background'])
-        clock_frame.grid(row=0, column=1, sticky='ns', padx=30)
-        
-        self.clock = AnalogueClock(clock_frame, size=220)
-        self.clock.pack()
+        # Configure grid to fill space
+        for i in range(cols):
+            grid_frame.grid_columnconfigure(i, weight=1, uniform='app_cols')
+        for i in range((len(apps) + cols - 1) // cols):
+            grid_frame.grid_rowconfigure(i, weight=1, uniform='app_rows')
         
         # Right side: Vertical stack of wide buttons
         side_frame = tk.Frame(content_frame, bg=self.config['theme']['background'])
-        side_frame.grid(row=0, column=2, sticky='nsew', padx=(30, 0))
+        side_frame.pack(side=tk.RIGHT, fill=tk.Y)
         
         side_buttons = self.config.get('side_buttons', [])
         for side_btn_data in side_buttons:
             btn = LauncherButton(side_frame, side_btn_data, wide=True)
             btn.pack(pady=8, fill=tk.X)
-        
-        # Configure grid weights to distribute space evenly
-        content_frame.grid_columnconfigure(0, weight=3, uniform='cols')
-        content_frame.grid_columnconfigure(1, weight=1, uniform='cols')
-        content_frame.grid_columnconfigure(2, weight=1, uniform='cols')
-        content_frame.grid_rowconfigure(0, weight=1)
+    
+    def update_datetime(self):
+        """Update the date/time label"""
+        now = datetime.now()
+        date_str = now.strftime("%A, %B %d, %Y")
+        time_str = now.strftime("%I:%M:%S %p")
+        self.datetime_label.config(text=f"{date_str}  |  {time_str}")
+        self.root.after(1000, self.update_datetime)
     
     def on_close(self):
         """Handle application close"""
