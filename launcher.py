@@ -145,7 +145,7 @@ class SystemInfoWindow:
         self.window.title("System Information")
         self.window.geometry("600x500")
         self.window.resizable(False, False)
-        self.window.configure(bg='#F5F5F5')
+        self.window.configure(bg='#D6D9D2')
         
         # Title bar frame
         title_frame = tk.Frame(self.window, bg='#4A90E2', height=30)
@@ -181,7 +181,7 @@ class SystemInfoWindow:
         # Info frame with border
         info_frame = tk.Frame(
             self.window,
-            bg='white',
+            bg='#E2E5DE',
             relief=tk.SUNKEN,
             borderwidth=2
         )
@@ -191,8 +191,8 @@ class SystemInfoWindow:
         self.text = tk.Text(
             info_frame,
             font=('Monospace', 10),
-            bg='white',
-            fg='#000000',
+            bg='#E2E5DE',
+            fg='#2F332E',
             relief=tk.FLAT,
             wrap=tk.WORD,
             padx=10,
@@ -284,11 +284,11 @@ class LauncherButton(tk.Frame):
         height = 80 if wide else 150
         
         self.configure(
-            bg='#F5F5F5',
+            bg='#E2E5DE',
             relief=tk.RAISED,
             borderwidth=2,
             highlightthickness=1,
-            highlightbackground='#A0A0A0',
+            highlightbackground='#A9AD9F',
             width=width,
             height=height
         )
@@ -296,11 +296,11 @@ class LauncherButton(tk.Frame):
         
         if wide:
             # Wide button layout (horizontal)
-            content_frame = tk.Frame(self, bg='#F5F5F5')
+            content_frame = tk.Frame(self, bg='#E2E5DE')
             content_frame.pack(expand=True, fill=tk.BOTH)
             
             # Icon on left
-            self.icon_label = tk.Label(content_frame, bg='#F5F5F5')
+            self.icon_label = tk.Label(content_frame, bg='#E2E5DE')
             self.icon_label.pack(side=tk.LEFT, padx=(8, 5))
             
             # Text on right
@@ -308,25 +308,25 @@ class LauncherButton(tk.Frame):
                 content_frame,
                 text=app_data['name'],
                 font=('Monospace', 11, 'bold'),
-                bg='#F5F5F5',
-                fg='#000000'
+                bg='#E2E5DE',
+                fg='#2F332E'
             )
             self.text_label.pack(side=tk.LEFT, padx=(5, 8))
         else:
             # Square button layout (vertical) - fill the space
             # Use a container frame to better control spacing
-            self.content_container = tk.Frame(self, bg='#F5F5F5')
+            self.content_container = tk.Frame(self, bg='#E2E5DE')
             self.content_container.pack(expand=True, fill=tk.BOTH, padx=5, pady=5)
             
-            self.icon_label = tk.Label(self.content_container, bg='#F5F5F5')
+            self.icon_label = tk.Label(self.content_container, bg='#E2E5DE')
             self.icon_label.pack(expand=True, fill=tk.BOTH)
             
             self.text_label = tk.Label(
                 self.content_container,
                 text=app_data['name'],
                 font=('Monospace', 13, 'bold'),
-                bg='#F5F5F5',
-                fg='#000000',
+                bg='#E2E5DE',
+                fg='#2F332E',
                 wraplength=160
             )
             self.text_label.pack(pady=(3, 0))
@@ -386,28 +386,31 @@ class LauncherButton(tk.Frame):
     
     def on_enter(self, event):
         """Handle mouse enter"""
-        self.configure(bg='#E0E0E0')
-        self.icon_label.configure(bg='#E0E0E0')
-        self.text_label.configure(bg='#E0E0E0')
+        hover_bg = '#D6D9D2'
+        self.configure(bg=hover_bg)
+        self.icon_label.configure(bg=hover_bg)
+        self.text_label.configure(bg=hover_bg)
         if hasattr(self, 'content_container'):
-            self.content_container.configure(bg='#E0E0E0')
+            self.content_container.configure(bg=hover_bg)
     
     def on_leave(self, event):
         """Handle mouse leave"""
-        self.configure(bg='#F5F5F5')
-        self.icon_label.configure(bg='#F5F5F5')
-        self.text_label.configure(bg='#F5F5F5')
+        normal_bg = '#E2E5DE'
+        self.configure(bg=normal_bg)
+        self.icon_label.configure(bg=normal_bg)
+        self.text_label.configure(bg=normal_bg)
         if hasattr(self, 'content_container'):
-            self.content_container.configure(bg='#F5F5F5')
+            self.content_container.configure(bg=normal_bg)
     
     def on_click(self, event):
         """Handle click event"""
         # Visual feedback
-        self.configure(bg='#C0C0C0')
-        self.icon_label.configure(bg='#C0C0C0')
-        self.text_label.configure(bg='#C0C0C0')
+        click_bg = '#C8CBC4'
+        self.configure(bg=click_bg)
+        self.icon_label.configure(bg=click_bg)
+        self.text_label.configure(bg=click_bg)
         if hasattr(self, 'content_container'):
-            self.content_container.configure(bg='#C0C0C0')
+            self.content_container.configure(bg=click_bg)
         self.after(100, lambda: self.on_leave(None))
         
         # Launch app
@@ -494,11 +497,11 @@ class AnalogueClock(tk.Canvas):
     
     def __init__(self, parent, **kwargs):
         size = kwargs.pop('size', 200)
-        super().__init__(parent, width=size, height=size, bg='#F5F5F5', 
+        super().__init__(parent, width=size, height=size, bg='#E2E5DE', 
                         highlightthickness=0, **kwargs)
         self.size = size
         self.center = size // 2
-        self.radius = size // 2 - 20
+        self.radius = size // 2 - 15
         
         self.running = True
         self.update_clock()
@@ -522,73 +525,74 @@ class AnalogueClock(tk.Canvas):
         minutes = now.minute
         seconds = now.second
         
-        # Draw clock face circle
+        # Draw clock face circle with bold border
         self.create_oval(
             self.center - self.radius,
             self.center - self.radius,
             self.center + self.radius,
             self.center + self.radius,
-            outline='#000000',
-            width=2
+            outline='#2F332E',
+            width=4,
+            fill='#E2E5DE'
         )
         
-        # Draw hour markers
+        # Draw hour markers - bolder
         for i in range(12):
             angle = math.radians(i * 30 - 90)
-            inner_radius = self.radius - 8
-            outer_radius = self.radius - 2
+            inner_radius = self.radius - 10
+            outer_radius = self.radius - 3
             
             x1 = self.center + inner_radius * math.cos(angle)
             y1 = self.center + inner_radius * math.sin(angle)
             x2 = self.center + outer_radius * math.cos(angle)
             y2 = self.center + outer_radius * math.sin(angle)
             
-            self.create_line(x1, y1, x2, y2, fill='#000000', width=2)
+            self.create_line(x1, y1, x2, y2, fill='#2F332E', width=3)
         
-        # Draw minute markers
+        # Draw minute markers - more visible
         for i in range(60):
             if i % 5 != 0:
                 angle = math.radians(i * 6 - 90)
-                inner_radius = self.radius - 5
-                outer_radius = self.radius - 2
+                inner_radius = self.radius - 6
+                outer_radius = self.radius - 3
                 
                 x1 = self.center + inner_radius * math.cos(angle)
                 y1 = self.center + inner_radius * math.sin(angle)
                 x2 = self.center + outer_radius * math.cos(angle)
                 y2 = self.center + outer_radius * math.sin(angle)
                 
-                self.create_line(x1, y1, x2, y2, fill='#666666', width=1)
+                self.create_line(x1, y1, x2, y2, fill='#A9AD9F', width=2)
         
         # Calculate hand angles
         hour_angle = math.radians((hours * 30 + minutes * 0.5) - 90)
         minute_angle = math.radians((minutes * 6 + seconds * 0.1) - 90)
         second_angle = math.radians((seconds * 6) - 90)
         
-        # Draw hour hand
+        # Draw hour hand - bolder
         hour_length = self.radius * 0.5
         hour_x = self.center + hour_length * math.cos(hour_angle)
         hour_y = self.center + hour_length * math.sin(hour_angle)
         self.create_line(self.center, self.center, hour_x, hour_y, 
-                        fill='#000000', width=4, capstyle=tk.ROUND)
+                        fill='#2F332E', width=6, capstyle=tk.ROUND)
         
-        # Draw minute hand
+        # Draw minute hand - bolder
         minute_length = self.radius * 0.7
         minute_x = self.center + minute_length * math.cos(minute_angle)
         minute_y = self.center + minute_length * math.sin(minute_angle)
         self.create_line(self.center, self.center, minute_x, minute_y, 
-                        fill='#000000', width=3, capstyle=tk.ROUND)
+                        fill='#2F332E', width=5, capstyle=tk.ROUND)
         
-        # Draw second hand
+        # Draw second hand - bolder
         second_length = self.radius * 0.8
         second_x = self.center + second_length * math.cos(second_angle)
         second_y = self.center + second_length * math.sin(second_angle)
         self.create_line(self.center, self.center, second_x, second_y, 
-                        fill='#E74C3C', width=1, capstyle=tk.ROUND)
+                        fill='#A9AD9F', width=2, capstyle=tk.ROUND)
         
-        # Draw center dot
-        self.create_oval(self.center - 4, self.center - 4,
-                        self.center + 4, self.center + 4,
-                        fill='#000000', outline='#000000')
+        # Draw center dot - larger and bolder
+        self.create_oval(self.center - 6, self.center - 6,
+                        self.center + 6, self.center + 6,
+                        fill='#2F332E', outline='#2F332E')
     
     def stop(self):
         """Stop the clock update thread"""
@@ -631,8 +635,8 @@ class PsionLauncher:
                 "rows": 2
             },
             "theme": {
-                "background": "#B0B0B0",
-                "text": "#000000"
+                "background": "#D6D9D2",
+                "text": "#2F332E"
             },
             "applications": [
                 {
@@ -759,11 +763,11 @@ class PsionLauncher:
         )
         self.datetime_label.pack(anchor='w', pady=(2, 0))
         
-        # Clock face in top-right corner
+        # Clock face in top-right corner - make it larger and more prominent
         clock_frame = tk.Frame(header_frame, bg=self.config['theme']['background'])
         clock_frame.pack(side=tk.RIGHT, padx=30)
         
-        self.clock = AnalogueClock(clock_frame, size=140)
+        self.clock = AnalogueClock(clock_frame, size=160)
         self.clock.pack()
         
         # Update date/time label
